@@ -86,11 +86,12 @@ function writeWav(samples, sampleRate) {
   return new Blob([buffer], { type: 'audio/wav' })
 }
 
-async function buildTestSequence() {
+async function buildSequence(shootingTime) {
   const commands = await Promise.all([
     loadWav('tio-sekunder-kvar.wav'),
     loadWav('fardiga.wav'),
-    loadWav('eld.wav')
+    loadWav('eld.wav'),
+    loadWav('eld-upphor-test.wav')
   ])
 
   const sampleRate = commands[0].sampleRate
@@ -98,9 +99,19 @@ async function buildTestSequence() {
     throw new Error('Kommandofilerna har olika samplingsfrekvens')
   }
 
-  const starts = [0, 7 * sampleRate, 10 * sampleRate]
-  const totalSamples = Math.max(...commands.map((command, index) => starts[index] + command.samples.length))
-  const sequence = new Int16Array(totalSamples)
+  const shootingEnd = (10 + shootingTime) * sampleRate
+  const starts = [
+    0,
+    7 * sampleRate,
+    10 * sampleRate,
+    shootingEnd - commands[3].samples.length
+  ]
+
+  if (starts[3] < starts[2]) {
+    throw new Error('Skjuttiden är kortare än kommandot Eld upphör')
+  }
+
+  const sequence = new Int16Array(shootingEnd)
 
   commands.forEach((command, index) => {
     sequence.set(command.samples, starts[index])
@@ -114,11 +125,12 @@ shootingTimeInput.addEventListener('input', validateShootingTime)
 startButton.addEventListener('click', async () => {
   if (!validateShootingTime()) return
 
+  const shootingTime = Number(shootingTimeInput.value)
   startButton.disabled = true
-  status.textContent = 'Bygger testsekvens...'
+  status.textContent = 'Bygger skjutsekvens...'
 
   try {
-    const wav = await buildTestSequence()
+    const wav = await buildSequence(shootingTime)
 
     if (sequenceAudio) sequenceAudio.pause()
     if (sequenceUrl) URL.revokeObjectURL(sequenceUrl)
@@ -127,15 +139,15 @@ startButton.addEventListener('click', async () => {
     sequenceAudio = new Audio(sequenceUrl)
     sequenceAudio.addEventListener('ended', () => {
       startButton.disabled = false
-      status.textContent = 'Ljudtest klart.'
+      status.textContent = 'Skjutsekvens klar.'
     })
 
-    status.textContent = 'Spelar test: 10 sekunder kvar → Färdiga → Eld.'
+    status.textContent = `Spelar sekvens med ${shootingTime} sekunders skjuttid.`
     await sequenceAudio.play()
   } catch (error) {
-    console.error('Kunde inte bygga eller spela testsekvensen.', error)
+    console.error('Kunde inte bygga eller spela skjutsekvensen.', error)
     startButton.disabled = false
-    status.textContent = 'Kunde inte bygga eller spela testsekvensen.'
+    status.textContent = 'Kunde inte bygga eller spela skjutsekvensen.'
   }
 })
 
