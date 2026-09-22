@@ -1,5 +1,23 @@
 import './style.css'
 
+async function removeLegacyPwa() {
+  if (!('serviceWorker' in navigator)) return
+
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(registrations.map((registration) => registration.unregister()))
+
+    if ('caches' in window) {
+      const cacheNames = await caches.keys()
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+    }
+  } catch (error) {
+    console.warn('Kunde inte städa bort den tidigare PWA-cachen.', error)
+  }
+}
+
+void removeLegacyPwa()
+
 const shootingTimeInput = document.querySelector('#shooting-time')
 const startButton = document.querySelector('.start-button')
 const status = document.querySelector('.status')
