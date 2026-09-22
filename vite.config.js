@@ -5,6 +5,9 @@ export default defineConfig({
   base: '/faltskytte-timer/',
   plugins: [
     VitePWA({
+      workbox: {
+        globPatterns: ['**/*.{js,css,html}', 'audio/commands/*.wav']
+      },
       manifest: {
         name: 'Fältskytte-timer',
         short_name: 'Fältskytte',
