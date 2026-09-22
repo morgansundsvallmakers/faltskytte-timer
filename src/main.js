@@ -3,6 +3,7 @@ import './style.css'
 const shootingTimeInput = document.querySelector('#shooting-time')
 const startButton = document.querySelector('.start-button')
 const status = document.querySelector('.status')
+const commandAudio = new Audio(`${import.meta.env.BASE_URL}audio/commands/tio-sekunder-kvar.wav`)
 
 function validateShootingTime() {
   const shootingTime = Number(shootingTimeInput.value)
@@ -18,11 +19,27 @@ function validateShootingTime() {
 
 shootingTimeInput.addEventListener('input', validateShootingTime)
 
-startButton.addEventListener('click', () => {
+startButton.addEventListener('click', async () => {
   if (!validateShootingTime()) return
 
   const shootingTime = Number(shootingTimeInput.value)
+  status.textContent = 'Spelar: 10 sekunder kvar.'
+
+  try {
+    commandAudio.currentTime = 0
+    await commandAudio.play()
+  } catch (error) {
+    console.error('Kunde inte spela kommandoljudet.', error)
+    status.textContent = 'Kunde inte spela kommandoljudet.'
+    return
+  }
+
   status.textContent = `Start registrerad. Skjuttid: ${shootingTime} sekunder.`
+})
+
+commandAudio.addEventListener('ended', () => {
+  const shootingTime = Number(shootingTimeInput.value)
+  status.textContent = `Ljudtest klart. Skjuttid: ${shootingTime} sekunder.`
 })
 
 validateShootingTime()
