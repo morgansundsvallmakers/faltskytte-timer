@@ -1,6 +1,29 @@
 # Fältskytte-timer
 
-Ett minimalt PWA-skelett med Vite och vanlig HTML, CSS och JavaScript. Ingen timer- eller WAV-logik finns ännu.
+En enkel mobilanpassad timer för fältskytte, byggd med Vite och vanlig HTML, CSS och JavaScript.
+
+Appen används för att ställa in skjuttiden för en station och spela upp kommandosekvensen för fast mål:
+
+- 10 sekunder kvar
+- Färdiga
+- Eld
+- Eld upphör
+
+Den kritiska timingen bygger inte på JavaScript-timers under uppspelningen. I stället sätts kommandon och tystnad ihop till en sammanhängande WAV-sekvens där tidsintervallen bestäms av antalet ljudsamplingar.
+
+## Publicerad app
+
+Appen publiceras automatiskt till GitHub Pages från `main`:
+
+https://morgansundsvallmakers.github.io/faltskytte-timer/
+
+## Status
+
+En första fungerande version finns publicerad och är testad på både dator och telefon.
+
+Under aktiv utveckling är PWA/service worker avstängd som standard för att undvika att gamla cachade versioner stör testning. PWA-stöd kan aktiveras vid bygge med miljövariabeln `PWA=true`.
+
+Ljudkommandona finns i `public/audio/commands/`. Nuvarande version använder prototypljud; de kan senare ersättas utan att ändra principen för den sample-baserade timingen.
 
 ## Lokalt
 
@@ -18,6 +41,4 @@ npm run build
 npm run preview
 ```
 
-Vite använder basvägen `/faltskytte-timer/` för GitHub Pages. Produktionsbygget i `dist/` innehåller manifest och service worker. Besök sidan en gång med nätverk så att filerna kan cachelagras innan den används offline. Kör via HTTPS eller localhost; service workers fungerar inte direkt från `file://`.
-
-De fem prototypfilerna för ljudkommandon finns i `public/audio/commands/` och följer med bygget. Framtida ljudfiler kan läggas i `public/audio/`. Ingen publiceringskonfiguration eller GitHub Pages-deploy har gjorts.
+Vite använder basvägen `/faltskytte-timer/` för GitHub Pages.
